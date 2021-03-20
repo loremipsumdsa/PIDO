@@ -1,9 +1,9 @@
 from copy import copy
-from random import randint
+from random import randint, choice
 from graphviz import Graph
 
 # Debug tools
-DEBUGMODE = True
+DEBUGMODE = False
 
 def printD(message):
     if DEBUGMODE:
@@ -71,8 +71,52 @@ def instanceGenerator(minVertices = 100, maxVertices = 1000, minObligations = 3,
     return (graph, obligationSet)
 
 def instanceGeneratorConnexe(minVertices = 100, maxVertices = 1000, minObligations = 3, maxObligations = 100, minEdges = 100, maxEdges = 1000):
-    pass
+    
+    vertices = randint(minVertices, maxVertices)
 
+    obligations = randint(minObligations, maxObligations)
+
+    edges = randint(minEdges, maxEdges)
+    
+    actualEdges = 0
+
+    graph = dict()
+    obligationSet = []
+
+    for i in range(obligations):
+        obligationSet.append(set())
+
+    obligationSet[0].add(0)
+    addVertex(graph,0)
+
+    for v in range(1, vertices):
+        vp = randint(0,v-1)
+        o = choice(obligationSet)
+        while vp in o:
+            o = choice(obligationSet)
+
+        o.add(v)
+        addVertex(graph, v)
+        addEdge(graph, v, vp)
+
+
+    while set() in obligationSet:
+        obligationSet.remove(set())
+        obligations -=1 
+
+    for i in range(edges - vertices):
+
+        o1 = randint(0,obligations - 1)
+        o2 = o1
+        while o2 == o1:
+            o2 = randint(0,obligations - 1)
+
+        p1 = randint(0, len(obligationSet[o1]) - 1)
+        p2 = randint(0, len(obligationSet[o2]) - 1)
+
+        addEdge(graph, list(obligationSet[o1])[p1], list(obligationSet[o2])[p2])
+
+    return (graph, obligationSet)
 
 def instanceGeneratorProportionnal(coef = 1):
     minVertices = randint(1,100)
@@ -80,10 +124,6 @@ def instanceGeneratorProportionnal(coef = 1):
     minEdges = int(coef * minVertices)
     maxEdges = int(coef * maxVertices)
     return instanceGenerator(minVertices = minVertices, maxVertices = maxVertices, minEdges = minEdges, maxEdges = maxEdges)
-
-
-
-
 
 
 # PIDO algorithm, original
@@ -118,10 +158,7 @@ def moreConnectedObligation(graph, obligationSet):
 
 # PIDO algorithm, Random alternative
 def randomObligation(obligationSet):
-    return obligationSet[randint(0,len(obligationSet)-1)]
-
-
-
+    return choice(obligationSet)
 
 
 def searchIDO(graph1, obligationSet1, mode = "Laforest"):
@@ -142,6 +179,7 @@ def searchIDO(graph1, obligationSet1, mode = "Laforest"):
 
         elif mode == "Random":
             b = randomObligation(obligationSet)
+            print("Random")
 
         else :
             exit("Error : Unknown mode")
@@ -336,13 +374,17 @@ def statisticCompare(n):
     avgdr1 = 0
     avgcr2 = 0
     avgdr2 = 0
+    avgcr3 = 0
+    avgdr3 = 0
     for i in range(n):
         #g, os = intanceGeneratorProportionnal(coef = 15)
         g, os = instanceGenerator()
         s1 = searchIDO(copy(g),copy(os), mode = "Laforest")
         s2 = searchIDO(copy(g),copy(os), mode = "IZIGANG")
+        s3 = searchIDO(copy(g),copy(os), mode = "Random")
         cr1,dr1 = evaluateIDO(g, s1)
         cr2,dr2 = evaluateIDO(g, s2)
+        cr3,dr3 = evaluateIDO(g, s3)
 
         avgcr1 += cr1
         avgdr1 += dr1
@@ -350,7 +392,10 @@ def statisticCompare(n):
         avgcr2 += cr2
         avgdr2 += dr2
 
-    print(f"Laforest : {avgcr1/n} ---- IZIGANG : {avgcr2/n}")
+        avgcr3 += cr3
+        avgdr3 += dr3
+
+    print(f"Laforest : {avgcr1/n} ---- IZIGANG : {avgcr2/n} ---- Random : {avgcr3/n}")
 
 #statisticCompare(1000)
 
@@ -378,8 +423,11 @@ def visualisationTest():
     visualisation(g,os,s2, title = "IZIGANG")
 
 
-visualisationTest()
+#visualisationTest()
 
- #statisticCompare(100)
+statisticCompare(1000)
 
 #initalTest()
+#g,os = instanceGeneratorConnexe(minVertices = 10, maxVertices = 20, minObligations = 3, maxObligations = 10, minEdges = 10, maxEdges = 30)
+#s = searchIDO(copy(g),copy(os), mode = "IZIGANG")
+#visualisation(g,os,s, title = "IZIGANG")
