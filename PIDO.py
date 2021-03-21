@@ -9,7 +9,11 @@ def printD(message):
     if DEBUGMODE:
         print(message)
 
-graph = dict()
+def randomColor():
+    random_number = randint(0,16777215)
+    hex_number = str(hex(random_number))
+    hex_number ='#'+ hex_number[2:]
+    return hex_number
 
 # Graph manipulation functions
 def addEdge(graph, v1,v2):
@@ -171,15 +175,15 @@ def searchIDO(graph1, obligationSet1, mode = "Laforest"):
 
         if mode ==  "Laforest" : 
             b = biggestObligation(obligationSet)
-            print("Laforest")
+            #print("Laforest")
 
         elif mode == "IZIGANG":
             b = moreConnectedObligation(graph, obligationSet)
-            print("IZIGANG")
+            #print("IZIGANG")
 
         elif mode == "Random":
             b = randomObligation(obligationSet)
-            print("Random")
+            #print("Random")
 
         else :
             exit("Error : Unknown mode")
@@ -217,21 +221,12 @@ def searchIDO(graph1, obligationSet1, mode = "Laforest"):
 #Solution evaluation function
 def evaluateIDO(graph, solution):
     vertices = set(graph.keys())
-
-    isCovered = dict()
-    for v in vertices:
-        isCovered[v] = False
-
+    coveredVertices = set()
+    coveredVertices = coveredVertices | solution
     for v in solution:
-        isCovered[v] = True
-        for neihbourg in graph[v]:
-            isCovered[neihbourg] = True
-    count = 0
-    for v in vertices:
-        if isCovered[v]:
-            count +=1
+        coveredVertices = coveredVertices | graph[v]
 
-    return (count/len(vertices) * 100, len(solution)/len(vertices) * 100)
+    return (len(coveredVertices)/len(vertices) * 100, len(solution)/len(vertices) * 100)
 
 
 
@@ -268,11 +263,9 @@ def visualisation(graph, obligationSet, solution, title = "new_graph_view"):
     verticesColor  = dict()
 
     for obligation in obligationSet:
-        random_number = randint(0,16777215)
-        hex_number = str(hex(random_number))
-        hex_number ='#'+ hex_number[2:]
+        obligationColor = randomColor()
         for vertex in obligation:
-            verticesColor[vertex] = hex_number
+            verticesColor[vertex] = color
 
     for vertex in graph.keys():
         includedVertices[vertex] = False
@@ -306,7 +299,6 @@ def visualisation(graph, obligationSet, solution, title = "new_graph_view"):
 #Test functions
 def initalTest():
     
-    """
     g = createGraph()
     
     addVertex(g,'a')
@@ -320,15 +312,14 @@ def initalTest():
     addEdge(g,'c','d')
     addEdge(g,'b','e')
 
-    o1 = ['a','c']
-    o2 = ['b','d']
-    o3 = ['e']
+    o1 = set(['a','c'])
+    o2 = set(['b','d'])
+    o3 = set(['e'])
 
     os = [o1,o2,o3]
 
-    """
 
-    g, os = instanceGenerator()
+    #g, os = instanceGenerator()
 
     print("------- INSTANCE -----------")
     print(f"Number of vertices : {len(g.keys())}")
@@ -350,6 +341,7 @@ def initalTest():
     print("\nSolution's evaluation :")
     print(f"    Covered vertices rate : {coveredVertices} %")
     print(f"    Dominating vertices rate : {dominatingVertices} %")
+    visualisation(g,os,s, title = "Laforest")
 
     print("\n")
 
@@ -367,35 +359,41 @@ def initalTest():
     print("\nSolution's evaluation :")
     print(f"    Covered vertices rate : {coveredVertices} %")
     print(f"    Dominating vertices rate : {dominatingVertices} %")
+    visualisation(g,os,s, title = "IZIGANG")
 
 
 def statisticCompare(n):
-    avgcr1 = 0
-    avgdr1 = 0
-    avgcr2 = 0
-    avgdr2 = 0
-    avgcr3 = 0
-    avgdr3 = 0
+    avgCoveredRateLaforest = 0
+    avgdominatingRateLaforest = 0
+    
+    avgCoveredRateIzigang = 0
+    avgdominatingRateIzigang = 0
+
+    avgCoveredRateRandom = 0
+    avgdominatingRateRandom = 0
+
     for i in range(n):
         #g, os = intanceGeneratorProportionnal(coef = 15)
         g, os = instanceGenerator()
-        s1 = searchIDO(copy(g),copy(os), mode = "Laforest")
-        s2 = searchIDO(copy(g),copy(os), mode = "IZIGANG")
-        s3 = searchIDO(copy(g),copy(os), mode = "Random")
-        cr1,dr1 = evaluateIDO(g, s1)
-        cr2,dr2 = evaluateIDO(g, s2)
-        cr3,dr3 = evaluateIDO(g, s3)
 
-        avgcr1 += cr1
-        avgdr1 += dr1
+        sLaforest = searchIDO(g,os, mode = "Laforest")
+        sIzigang = searchIDO(g,os, mode = "IZIGANG")
+        sRandom = searchIDO(g,os, mode = "Random")
 
-        avgcr2 += cr2
-        avgdr2 += dr2
+        coveredRateLaforest,dominatingRateLaforest = evaluateIDO(g, sLaforest)
+        coveredRateIzigang,dominatingRateIzigang = evaluateIDO(g, sIzigang)
+        coveredRateRandom,dominatingRateRandom = evaluateIDO(g, sRandom)
 
-        avgcr3 += cr3
-        avgdr3 += dr3
+        avgCoveredRateLaforest += coveredRateLaforest
+        avgdominatingRateLaforest += dominatingRateLaforest
 
-    print(f"Laforest : {avgcr1/n} ---- IZIGANG : {avgcr2/n} ---- Random : {avgcr3/n}")
+        avgCoveredRateIzigang += coveredRateIzigang
+        avgdominatingRateIzigang += dominatingRateIzigang
+
+        avgCoveredRateRandom += coveredRateRandom
+        avgdominatingRateRandom += dominatingRateRandom
+
+    print(f"Laforest : {avgCoveredRateLaforest/n}  ({avgdominatingRateLaforest/n}) ---- IZIGANG : {avgCoveredRateIzigang/n} ({avgdominatingRateIzigang/n})---- Random : {avgCoveredRateRandom/n} ({avgdominatingRateRandom/n})")
 
 #statisticCompare(1000)
 
@@ -425,7 +423,7 @@ def visualisationTest():
 
 #visualisationTest()
 
-statisticCompare(1000)
+statisticCompare(100)
 
 #initalTest()
 #g,os = instanceGeneratorConnexe(minVertices = 10, maxVertices = 20, minObligations = 3, maxObligations = 10, minEdges = 10, maxEdges = 30)
