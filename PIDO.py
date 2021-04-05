@@ -1,139 +1,14 @@
 from copy import copy
 from random import randint, choice
-from graphviz import Graph
-import matplotlib.pyplot as plt
-
-# Debug tools
-DEBUGMODE = False
-
-def printD(message):
-    if DEBUGMODE:
-        print(message)
-
-def randomColor():
-    random_number = randint(0,16777215)
-    hex_number = str(hex(random_number))
-    hex_number ='#'+ hex_number[2:]
-    return hex_number
-
-# Graph manipulation functions
-def addEdge(graph, v1,v2):
-    try :
-        graph[v1].add(v2)
-        graph[v2].add(v1)
-    except KeyError:
-        pass
-
-def createGraph():
-    return dict()
-
-def addVertex(graph, v):
-    graph[v] = set()
-
-def deleteVertex(graph, v):
-    try :
-        del graph[v]
-    except KeyError:
-        pass
+from graphs_generators import *
+from visualisation_tools import *
 
 
-#Instance generators
-def instanceGenerator(minVertices = 100, maxVertices = 1000, minObligations = 3, maxObligations = 100, minEdges = 100, maxEdges = 1000):
-        
-    vertices = randint(minVertices, maxVertices)
-
-    obligations = randint(minObligations, maxObligations)
-
-    edges = randint(minEdges, maxEdges)
-    
-    graph = dict()
-    obligationSet = []
-
-    for i in range(obligations):
-        obligationSet.append(set())
-
-    for v in range(vertices):
-        o = randint(0,obligations - 1)
-        obligationSet[o].add(v)
-        addVertex(graph, v)
-
-    while set() in obligationSet:
-        obligationSet.remove(set())
-        obligations -=1 
-
-    for i in range(edges):
-
-        o1 = randint(0,obligations - 1)
-        o2 = o1
-        while o2 == o1:
-            o2 = randint(0,obligations - 1)
-
-        p1 = randint(0, len(obligationSet[o1]) - 1)
-        p2 = randint(0, len(obligationSet[o2]) - 1)
-
-        addEdge(graph, list(obligationSet[o1])[p1], list(obligationSet[o2])[p2])
-
-    return (graph, obligationSet)
-
-def instanceGeneratorConnexe(minVertices = 100, maxVertices = 1000, minObligations = 3, maxObligations = 100, minEdges = 100, maxEdges = 1000):
-    
-    vertices = randint(minVertices, maxVertices)
-
-    obligations = randint(minObligations, maxObligations)
-
-    edges = randint(minEdges, maxEdges)
-    
-    actualEdges = 0
-
-    graph = dict()
-    obligationSet = []
-
-    for i in range(obligations):
-        obligationSet.append(set())
-
-    obligationSet[0].add(0)
-    addVertex(graph,0)
-
-    for v in range(1, vertices):
-        vp = randint(0,v-1)
-        o = choice(obligationSet)
-        while vp in o:
-            o = choice(obligationSet)
-
-        o.add(v)
-        addVertex(graph, v)
-        addEdge(graph, v, vp)
-
-
-    while set() in obligationSet:
-        obligationSet.remove(set())
-        obligations -=1 
-
-    for i in range(edges - vertices):
-
-        o1 = randint(0,obligations - 1)
-        o2 = o1
-        while o2 == o1:
-            o2 = randint(0,obligations - 1)
-
-        p1 = randint(0, len(obligationSet[o1]) - 1)
-        p2 = randint(0, len(obligationSet[o2]) - 1)
-
-        addEdge(graph, list(obligationSet[o1])[p1], list(obligationSet[o2])[p2])
-
-    return (graph, obligationSet)
-
-def instanceGeneratorProportionnal(coef = 1):
-    minVertices = randint(1,100)
-    maxVertices = minVertices + 9900
-    minEdges = int(coef * minVertices)
-    maxEdges = int(coef * maxVertices)
-    return instanceGenerator(minVertices = minVertices, maxVertices = maxVertices, minEdges = minEdges, maxEdges = maxEdges)
-
-
-
-# PIDO algorithm, original
+# Obligation selector algorithm, original
 def biggestObligation(obligationSet):
+    """
+    Take the set of  obligations and return the one which contains a maximum of vertices. This is the original selector by C. Laforest 
+    """
     b = 0
     for i in range (len(obligationSet)):
         if len(obligationSet[i]) > len(obligationSet[b]) :
@@ -141,8 +16,11 @@ def biggestObligation(obligationSet):
     return obligationSet[b]
 
 
-# PIDO algorithm, IZIGANG alternative
+# Obligation selector algorithm, IZIGANG alternative
 def moreConnectedObligation(graph, obligationSet):
+    """
+    Take the set of  obligations and return the one which cumulate a maximum of neighbours. This is the alternative selector by IZIGANG tm
+    """
     b = 0
     neighbourI=set()
     neighbourB=set()
@@ -162,13 +40,20 @@ def moreConnectedObligation(graph, obligationSet):
     return obligationSet[b]
 
 
-# PIDO algorithm, Random alternative
+# Obligation selector algorithm, Random alternative
 def randomObligation(obligationSet):
+    """
+    Take the set of  obligations and return a random one
+    """
     return choice(obligationSet)
 
 
 def searchIDO(graph1, obligationSet1, mode = "Laforest"):
-    
+    """
+    Take the an instance : a graphs (dictionnary) and an obligation set plus a mode (Laforest, IZIGANG or Random)
+    Calculate a PIDO by using the selected selector
+    return the solution (set of dominants vertices)
+    """
     graph = copy(graph1)
     obligationSet = copy(obligationSet1)
     s = set()
@@ -219,245 +104,3 @@ def searchIDO(graph1, obligationSet1, mode = "Laforest"):
                         break
 
     return s
-
-#Solution evaluation function
-def evaluateIDO(graph, solution):
-    vertices = set(graph.keys())
-    coveredVertices = set()
-    coveredVertices = coveredVertices | solution
-    for v in solution:
-        coveredVertices = coveredVertices | graph[v]
-
-    return (len(coveredVertices)/len(vertices) * 100, len(solution)/len(vertices) * 100)
-
-
-
-
-#Prints functions
-def printInstance(graph, obligationSet):
-    print("------- INSTANCE -----------")
-    print(f"Number of vertices : {len(graph.keys())}")
-    print(f"Number of obligation : {len(obligationSet)}")
-
-    print("\n")
-
-
-def printResult(graph, solution, evaluation = True):
-    print("------- RESULT -----------")
-    print("Dominating Vertices", end = " : ")
-    for v in solution:
-        print(v, end = ", ")
-
-    if evaluation:
-        overedVertices, dominatingVertices = evaluateIDO(graph,solution)
-        print("\nSolution's evaluation :")
-        print(f"    Covered vertices rate : {coveredVertices} %")
-        print(f"    Dominating vertices rate : {dominatingVertices} %")
-
-    print("\n")
-
-
-def visualisation(graph, obligationSet, solution, title = "new_graph_view"):
-
-    includedEdges = set()
-    includedVertices = dict()
-
-    verticesColor  = dict()
-
-    for obligation in obligationSet:
-        obligationColor = randomColor()
-        for vertex in obligation:
-            verticesColor[vertex] = color
-
-    for vertex in graph.keys():
-        includedVertices[vertex] = False
-
-    g = Graph('G', filename=title+'.gv', engine='sfdp')
-
-    for vertex in solution:
-        g.node(str(vertex), fillcolor = "#b5ff66", style = "filled", color = verticesColor[vertex], penwidth = "2")
-        includedVertices[vertex] = True
-        
-        for neihbourg in graph[vertex]:
-            g.node(str(neihbourg), fillcolor = "#e6ffcc", style = "filled", color = verticesColor[neihbourg], penwidth = "2")
-            includedVertices[neihbourg] = True
-
-        for vertex in graph.keys():
-            if not(includedVertices[vertex]):
-                g.node(str(vertex), fillcolor = "white", style = "filled", color = verticesColor[vertex], penwidth = "2")
-                includedVertices[vertex] = True
-
-    for vertex in graph.keys():
-        for neihbourg in graph[vertex]:
-            if not((vertex,neihbourg) in includedEdges):
-                g.edge(str(vertex), str(neihbourg))
-                includedEdges.add((vertex,neihbourg))
-                includedEdges.add((neihbourg,vertex))
-
-
-    g.view()
-
-
-#Test functions
-def initalTest():
-    
-    g = createGraph()
-    
-    addVertex(g,'a')
-    addVertex(g,'b')
-    addVertex(g,'c')
-    addVertex(g,'d')
-    addVertex(g,'e')
-
-    addEdge(g,'a','b')
-    addEdge(g,'b','c')
-    addEdge(g,'c','d')
-    addEdge(g,'b','e')
-
-    o1 = set(['a','c'])
-    o2 = set(['b','d'])
-    o3 = set(['e'])
-
-    os = [o1,o2,o3]
-
-
-    #g, os = instanceGenerator()
-
-    print("------- INSTANCE -----------")
-    print(f"Number of vertices : {len(g.keys())}")
-    print(f"Number of obligation : {len(os)}")
-
-    print("\n")
-
-    print("------- ALGORITHM (Laforest's version) -----------")
-    s = searchIDO(copy(g),copy(os), mode = "Laforest")
-
-    print("\n")
-
-    print("------- RESULT -----------")
-    print("Dominating Vertices", end = " : ")
-    for v in s:
-        print(v, end = ", ")
-
-    coveredVertices, dominatingVertices = evaluateIDO(g,s)
-    print("\nSolution's evaluation :")
-    print(f"    Covered vertices rate : {coveredVertices} %")
-    print(f"    Dominating vertices rate : {dominatingVertices} %")
-    visualisation(g,os,s, title = "Laforest")
-
-    print("\n")
-
-    print("------- ALGORITHM (IZIGANG tm's version) -----------")
-    s = searchIDO(copy(g),copy(os), mode = "IZIGANG")
-
-    print("\n")
-
-    print("------- RESULT -----------")
-    print("Dominating Vertices", end = " : ")
-    for v in s:
-        print(v, end = ", ")
-
-    coveredVertices, dominatingVertices = evaluateIDO(g,s)
-    print("\nSolution's evaluation :")
-    print(f"    Covered vertices rate : {coveredVertices} %")
-    print(f"    Dominating vertices rate : {dominatingVertices} %")
-    visualisation(g,os,s, title = "IZIGANG")
-
-
-def statisticCompare(n):
-    avgCoveredRateLaforest = 0
-    avgdominatingRateLaforest = 0
-    
-    avgCoveredRateIzigang = 0
-    avgdominatingRateIzigang = 0
-
-    avgCoveredRateRandom = 0
-    avgdominatingRateRandom = 0
-
-    for i in range(n):
-        #g, os = intanceGeneratorProportionnal(coef = 15)
-        g, os = instanceGenerator()
-
-        sLaforest = searchIDO(g,os, mode = "Laforest")
-        sIzigang = searchIDO(g,os, mode = "IZIGANG")
-        sRandom = searchIDO(g,os, mode = "Random")
-
-        coveredRateLaforest,dominatingRateLaforest = evaluateIDO(g, sLaforest)
-        coveredRateIzigang,dominatingRateIzigang = evaluateIDO(g, sIzigang)
-        coveredRateRandom,dominatingRateRandom = evaluateIDO(g, sRandom)
-
-        avgCoveredRateLaforest += coveredRateLaforest
-        avgdominatingRateLaforest += dominatingRateLaforest
-
-        avgCoveredRateIzigang += coveredRateIzigang
-        avgdominatingRateIzigang += dominatingRateIzigang
-
-        avgCoveredRateRandom += coveredRateRandom
-        avgdominatingRateRandom += dominatingRateRandom
-
-    #print(f"Laforest : {avgCoveredRateLaforest/n}  ({avgdominatingRateLaforest/n}) ---- IZIGANG : {avgCoveredRateIzigang/n} ({avgdominatingRateIzigang/n})---- Random : {avgCoveredRateRandom/n} ({avgdominatingRateRandom/n})")
-    statistics = dict()
-    statistics["Laforest"] = (avgCoveredRateLaforest/n, avgdominatingRateLaforest/n)
-    statistics["IZIGANG"] = (avgCoveredRateIzigang/n, avgdominatingRateIzigang/n)
-    statistics["Random"] = (avgCoveredRateRandom/n, avgdominatingRateRandom/n)
-
-    return statistics
-
-
-def statisticsVisualisation(statistics):
-    width = 0.8
-    y1 = []
-    y2 = []
-    nom = []
-    x = [0,1,2] # position en abscisse des barres
-    # Tracé
-
-    for k in statistics.keys():
-        y1.append(int(statistics[k][0]))
-        y2.append(int(statistics[k][1]))
-        nom.append(k)
-
-    print(y1)
-    print(y2)
-    print(nom)
-
-    plt.bar(x, y1, width = width, color = "#3ED8C9")
-    plt.bar(x, y2, width = width, bottom = y1, color = "#EDFF91")
-    plt.xticks(range(len(y1)), nom)
-    plt.show()
-
-
-#statisticCompare(1000)
-
-def visualisationTest():
-    g, os = instanceGenerator()
-    s = searchIDO(copy(g),copy(os), mode = "Laforest")
-    s2 = searchIDO(copy(g),copy(os), mode = "IZIGANG")
-
-    print("------- INSTANCE -----------")
-    print(f"Number of vertices : {len(g.keys())}")
-    print(f"Number of obligation : {len(os)}")
-
-    print("------- RESULT -----------")
-    print("Dominating Vertices", end = " : ")
-    for v in s:
-        print(v, end = ", ")
-
-    coveredVertices, dominatingVertices = evaluateIDO(g,s)
-    print("\nSolution's evaluation :")
-    print(f"    Covered vertices rate : {coveredVertices} %")
-    print(f"    Dominating vertices rate : {dominatingVertices} %")
-
-    print("\n")
-    visualisation(g,os,s, title = "Laforest")
-    visualisation(g,os,s2, title = "IZIGANG")
-
-
-#visualisationTest()
-
-d = statisticCompare(100)
-statisticsVisualisation(d)
-#initalTest()
-#g,os = instanceGeneratorConnexe(minVertices = 10, maxVertices = 20, minObligations = 3, maxObligations = 10, minEdges = 10, maxEdges = 30)
-#s = searchIDO(copy(g),copy(os), mode = "IZIGANG")
-#visualisation(g,os,s, title = "IZIGANG")
