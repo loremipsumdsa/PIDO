@@ -1,6 +1,7 @@
 from copy import copy
 from random import randint, choice
 from graphviz import Graph
+import matplotlib.pyplot as plt
 
 # Debug tools
 DEBUGMODE = False
@@ -128,6 +129,7 @@ def instanceGeneratorProportionnal(coef = 1):
     minEdges = int(coef * minVertices)
     maxEdges = int(coef * maxVertices)
     return instanceGenerator(minVertices = minVertices, maxVertices = maxVertices, minEdges = minEdges, maxEdges = maxEdges)
+
 
 
 # PIDO algorithm, original
@@ -393,7 +395,37 @@ def statisticCompare(n):
         avgCoveredRateRandom += coveredRateRandom
         avgdominatingRateRandom += dominatingRateRandom
 
-    print(f"Laforest : {avgCoveredRateLaforest/n}  ({avgdominatingRateLaforest/n}) ---- IZIGANG : {avgCoveredRateIzigang/n} ({avgdominatingRateIzigang/n})---- Random : {avgCoveredRateRandom/n} ({avgdominatingRateRandom/n})")
+    #print(f"Laforest : {avgCoveredRateLaforest/n}  ({avgdominatingRateLaforest/n}) ---- IZIGANG : {avgCoveredRateIzigang/n} ({avgdominatingRateIzigang/n})---- Random : {avgCoveredRateRandom/n} ({avgdominatingRateRandom/n})")
+    statistics = dict()
+    statistics["Laforest"] = (avgCoveredRateLaforest/n, avgdominatingRateLaforest/n)
+    statistics["IZIGANG"] = (avgCoveredRateIzigang/n, avgdominatingRateIzigang/n)
+    statistics["Random"] = (avgCoveredRateRandom/n, avgdominatingRateRandom/n)
+
+    return statistics
+
+
+def statisticsVisualisation(statistics):
+    width = 0.8
+    y1 = []
+    y2 = []
+    nom = []
+    x = [0,1,2] # position en abscisse des barres
+    # Tracé
+
+    for k in statistics.keys():
+        y1.append(int(statistics[k][0]))
+        y2.append(int(statistics[k][1]))
+        nom.append(k)
+
+    print(y1)
+    print(y2)
+    print(nom)
+
+    plt.bar(x, y1, width = width, color = "#3ED8C9")
+    plt.bar(x, y2, width = width, bottom = y1, color = "#EDFF91")
+    plt.xticks(range(len(y1)), nom)
+    plt.show()
+
 
 #statisticCompare(1000)
 
@@ -423,8 +455,8 @@ def visualisationTest():
 
 #visualisationTest()
 
-statisticCompare(100)
-
+d = statisticCompare(100)
+statisticsVisualisation(d)
 #initalTest()
 #g,os = instanceGeneratorConnexe(minVertices = 10, maxVertices = 20, minObligations = 3, maxObligations = 10, minEdges = 10, maxEdges = 30)
 #s = searchIDO(copy(g),copy(os), mode = "IZIGANG")
