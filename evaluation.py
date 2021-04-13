@@ -15,48 +15,36 @@ def evaluatePIDO(graph, solution):
     for v in solution:
         coveredVertices = coveredVertices | graph[v]
 
-    return (len(coveredVertices)/len(vertices) * 100, len(solution)/len(vertices) * 100)
+    return (len(coveredVertices)/len(vertices) * 100, len(solution)/len(vertices) * 100, ((len(coveredVertices)- len(solution))/len(vertices) * 100) / (len(solution)/len(vertices) * 100)  )
 
 
-def statisticCompare(n, generator):
+def statisticCompare(n, generator, modes):
     """
-    take a integer n and an instance generator function
+    take a integer n, an instance generator function and a list of obligation selector modes
     Calculate and evaluate a PIDO solution for n instance from the generator with each mode
-    return a dictionnary, the keys are modes and values are tuples with average covered vertices rate and dominant vertices rate 
+    return a dictionnary, the keys are modes and values are tuples with average covered vertices rate, dominant vertices rate and dominated vertices peer dominant vertex
     """
-    avgCoveredRateLaforest = 0
-    avgDominantRateLaforest = 0
     
-    avgCoveredRateIzigang = 0
-    avgDominantRateIzigang = 0
+    statistics = dict()
+    for mode in modes:
+        statistics[mode] = [0,0,0]
 
-    avgCoveredRateRandom = 0
-    avgDominantRateRandom = 0
 
     for i in range(n):
         g, os = generator()
 
-        sLaforest = searchIDO(g,os, mode = "Laforest")
-        sIzigang = searchIDO(g,os, mode = "IZIGANG")
-        sRandom = searchIDO(g,os, mode = "Random")
+        for mode in modes:
+            solution = searchIDO(g,os, mode = mode)
+            coveredRate, dominantRate, domination = evaluatePIDO(g,solution)
+            statistics[mode][0] += coveredRate
+            statistics[mode][1] += dominantRate
+            statistics[mode][2] += domination
 
-        coveredRateLaforest,dominantRateLaforest = evaluatePIDO(g, sLaforest)
-        coveredRateIzigang,dominantRateIzigang = evaluatePIDO(g, sIzigang)
-        coveredRateRandom,dominantRateRandom = evaluatePIDO(g, sRandom)
+    for mode in modes:
+        statistics[mode][0]/=n
+        statistics[mode][1]/=n
+        statistics[mode][2]/=n
 
-        avgCoveredRateLaforest += coveredRateLaforest
-        avgDominantRateLaforest += dominantRateLaforest
-
-        avgCoveredRateIzigang += coveredRateIzigang
-        avgDominantRateIzigang += dominantRateIzigang
-
-        avgCoveredRateRandom += coveredRateRandom
-        avgDominantRateRandom += dominantRateRandom
-
-    printD(f"Laforest : {avgCoveredRateLaforest/n}  ({avgDominantRateLaforest/n}) ---- IZIGANG : {avgCoveredRateIzigang/n} ({avgDominantRateIzigang/n})---- Random : {avgCoveredRateRandom/n} ({avgDominantRateRandom/n})")
-    statistics = dict()
-    statistics["Laforest"] = (avgCoveredRateLaforest/n, avgDominantRateLaforest/n)
-    statistics["IZIGANG"] = (avgCoveredRateIzigang/n, avgDominantRateIzigang/n)
-    statistics["Random"] = (avgCoveredRateRandom/n, avgDominantRateRandom/n)
+        printD(f"Mode {mode} : covered : {statistics[mode][0]} , dominants :{statistics[mode][1]} , domination : {statistics[mode][2]}.")
 
     return statistics

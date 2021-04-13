@@ -40,7 +40,49 @@ def moreConnectedObligation(graph, obligationSet):
     return obligationSet[b]
 
 
+def alternativeObligation(graph,obligationSet):
+    b = 0
+    neighbourI=set()
+    neighbourB=set()
+
+    for i in range (len(obligationSet)):
+        neighbourI=set()
+
+        for vertex in obligationSet[i]:
+            neighbourI.add(vertex)
+            for neighbourVertex in graph[vertex]:
+                neighbourI.add(neighbourVertex)
+
+            if len(neighbourI) > len(neighbourB):
+                b=i
+                neighbourB=neighbourI.copy()
+
+    return obligationSet[b]
+
+
+def alternative2Obligation(graph, obligationSet,balance = 2):
+    """
+    Take the set of  obligations and return the one which cumulate a maximum of neighbours. This is the alternative selector by IZIGANG tm
+    """
+    b = 0
+    neighbourI=set()
+    neighbourB=set()
+
+    for i in range (len(obligationSet)):
+        neighbourI=set()
+
+        for vertex in obligationSet[i]:
+
+            for neighbourVertex in graph[vertex]:
+                neighbourI.add(neighbourVertex)
+
+            if len(neighbourI) * (1+balance)/len(obligationSet[i])>len(neighbourB)*(1+balance)/len(obligationSet[b]):
+                b=i
+                neighbourB=neighbourI.copy()
+
+    return obligationSet[b]
 # Obligation selector algorithm, Random alternative
+
 def randomObligation(obligationSet):
     """
     Take the set of  obligations and return a random one
@@ -68,6 +110,12 @@ def searchIDO(graph1, obligationSet1, mode = "Laforest"):
             b = moreConnectedObligation(graph, obligationSet)
             #print("IZIGANG")
 
+        elif mode == "Alternative":
+            b = alternativeObligation(graph,obligationSet)
+
+        elif mode == "Alternative2":
+            b = alternative2Obligation(graph,obligationSet)
+        
         elif mode == "Random":
             b = randomObligation(obligationSet)
             #print("Random")

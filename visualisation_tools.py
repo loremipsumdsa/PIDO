@@ -15,12 +15,20 @@ def randomColor():
 
 # Debug tools
 DEBUGMODE = False
+WARNINGMODE = True
 
 def printD(message):
     """
     print message if DebugMode
     """
     if DEBUGMODE:
+        print(message)
+
+def printW(message):
+    """
+    print message if WARNINGMODE
+    """
+    if WARNINGMODE:
         print(message)
 
 def printInstance(graph, obligationSet):
@@ -108,7 +116,7 @@ def statisticsVisualisation(statistics, title = "PIDO results"):
     y1 = []
     y2 = []
     labels = []
-    x = [0,1,2]
+    x = range(len(statistics.keys()))
 
     for k in statistics.keys():
         y2.append(int(statistics[k][0] - statistics[k][1]))
@@ -121,9 +129,9 @@ def statisticsVisualisation(statistics, title = "PIDO results"):
     plt.ylabel("Vertices rate (%)")
     plt.legend(loc = "upper left")
 
-    #plt.text("Laforest", 3 + .25, "CACA BOUDIN", color='blue', fontweight='bold', fontsize = "xx-large")
 
     for bar in labels:
         plt.text(bar, statistics[bar][1]/2, str(round(statistics[bar][1],1))+"%", color='black', fontweight='light', fontsize = "large")
         plt.text(bar, (statistics[bar][1]+statistics[bar][0])/2, str(round(statistics[bar][0],1))+"%", color='black', fontweight='light', fontsize = "large")
+        plt.text(bar, (statistics[bar][0]), "("+str(round(statistics[bar][2],1))+")", color='black', fontweight='bold', fontsize = "small")
     plt.show()

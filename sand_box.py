@@ -2,7 +2,8 @@ from PIDO import *
 from visualisation_tools import *
 from evaluation import *
 from graphs_generators import *
-
+#from graphs_generators2 import *
+import matplotlib.pyplot as plt
 
 #Test functions
 def initalTest():
@@ -44,11 +45,11 @@ def initalTest():
     for v in s:
         print(v, end = ", ")
 
-    coveredVertices, dominatingVertices = evaluateIDO(g,s)
+    coveredVertices, dominatingVertices = evaluatePIDO(g,s)
     print("\nSolution's evaluation :")
     print(f"    Covered vertices rate : {coveredVertices} %")
     print(f"    Dominating vertices rate : {dominatingVertices} %")
-    visualisation(g,os,s, title = "Laforest")
+    graphs_visualisation(g,os,s, title = "Laforest")
 
     print("\n")
 
@@ -78,19 +79,38 @@ def visualisationTest(generator):
     s1 = searchIDO(copy(g),copy(os), mode = "IZIGANG")
     s2 = searchIDO(copy(g),copy(os), mode = "Random")
 
-    coveredVertices, dominantVertices = evaluatePIDO(g,s)
+    coveredVertices, dominantVertices, caca = evaluatePIDO(g,s)
     graphs_visualisation(g,os,s, title = "Laforest")
     graphs_visualisation(g,os,s1, title = "IZIGANG")
     graphs_visualisation(g,os,s2, title = "Random")
 
-
+    plt.text(bar, (statistics[bar][1]+statistics[bar][0])/2, str(round(statistics[bar][0],1))+"%", color='black', fontweight='light', fontsize = "large")
 def main():
-    d = statisticCompare(100, instanceGeneratorConnexe)
-    #statisticsVisualisation(d, "PIDO results on 100 connexes instances")
+    #d = statisticCompare(3, instanceGeneratorHypercube)
+    #statisticsVisualisation(d, "PIDO results on 3 hypercubes instances")
 
-    d = statisticCompare(100, instanceGenerator)
-    statisticsVisualisation(d, "PIDO results on 100 full random instances")
+    # d = statisticCompare(100, instanceGenerator)
+    # statisticsVisualisation(d, "PIDO results on 100 full random instances")
 
-    #visualisationTest(instanceGeneratorProportionnal)
+    d = statisticCompare(500, instanceGenerator,["Laforest","IZIGANG","Alternative","Alternative2","Random"])
+    statisticsVisualisation(d, "PIDO results on 100 hypercubes instances")
+
+    #print("caca")
+    #visualisationTest(instanceGeneratorHypercube)
+    #print("caca2")
+    #initalTest()
+
+    #g,os = InstanceFromFile("H3")
+    #s = searchIDO(g,os, mode = "IZIGANG")
+    #graphs_visualisation(g,os,s, title = "IZIGANG")
+
+    """
+    g,os = instanceGeneratorHypercube()
+    instanceToFile(g,os,"test.txt")
+
+    g1,os1 = instanceFromFile("test.txt")
+    s = searchIDO(g1,os1, mode = "IZIGANG")
+    graphs_visualisation(g1,os1,s, title = "IZIGANG")
+    """
 
 main()
