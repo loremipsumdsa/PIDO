@@ -84,7 +84,6 @@ def visualisationTest(generator):
     graphs_visualisation(g,os,s1, title = "IZIGANG")
     graphs_visualisation(g,os,s2, title = "Random")
 
-    plt.text(bar, (statistics[bar][1]+statistics[bar][0])/2, str(round(statistics[bar][0],1))+"%", color='black', fontweight='light', fontsize = "large")
 def main():
     #d = statisticCompare(3, instanceGeneratorHypercube)
     #statisticsVisualisation(d, "PIDO results on 3 hypercubes instances")
@@ -92,9 +91,42 @@ def main():
     # d = statisticCompare(100, instanceGenerator)
     # statisticsVisualisation(d, "PIDO results on 100 full random instances")
 
-    d = statisticCompare(500, instanceGenerator,["Laforest","IZIGANG","Alternative","Alternative2","Random"])
-    statisticsVisualisation(d, "PIDO results on 100 hypercubes instances")
+    #d, meta = statisticCompare(1000, instanceGeneratorFullRandom,["Size","Dominant","Covering","Dominating","Random"])
+    #statisticsVisualisation(d,meta, "PIDO results on 500 hypercubes instances")
 
+    for i in range(1000):
+        g,os,meta = instanceGeneratorFullRandom()
+        s = searchIDO(g,os,"Size")
+
+        if not(checkSolution(os,s)):
+            print("AAAAAAALLLLLLLEEEEEERRRRRRRTTTTTTTTTTTEEEEEEEEEEE")
+
+    for i in range(1000):
+        g,os,meta = instanceGeneratorFullRandom()
+        s = searchIDO(g,os,"Dominant")
+
+        if not(checkSolution(os,s)):
+            print("AAAAAAALLLLLLLEEEEEERRRRRRRTTTTTTTTTTTEEEEEEEEEEE")
+
+    for i in range(1000):
+        g,os,meta = instanceGeneratorFullRandom()
+        s = searchIDO(g,os,"Covering")
+
+        if not(checkSolution(os,s)):
+            print("AAAAAAALLLLLLLEEEEEERRRRRRRTTTTTTTTTTTEEEEEEEEEEE")
+    for i in range(1000):
+        g,os,meta = instanceGeneratorFullRandom()
+        s = searchIDO(g,os,"Dominating")
+
+        if not(checkSolution(os,s)):
+            print("AAAAAAALLLLLLLEEEEEERRRRRRRTTTTTTTTTTTEEEEEEEEEEE")
+
+    for i in range(1000):
+        g,os,meta = instanceGeneratorFullRandom()
+        s = searchIDO(g,os,"Random")
+
+        if not(checkSolution(os,s)):
+            print("AAAAAAALLLLLLLEEEEEERRRRRRRTTTTTTTTTTTEEEEEEEEEEE")
     #print("caca")
     #visualisationTest(instanceGeneratorHypercube)
     #print("caca2")

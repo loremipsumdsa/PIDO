@@ -17,9 +17,9 @@ def biggestObligation(obligationSet):
 
 
 # Obligation selector algorithm, IZIGANG alternative
-def moreConnectedObligation(graph, obligationSet):
+def mostDominantObligation(graph, obligationSet):
     """
-    Take the set of  obligations and return the one which cumulate a maximum of neighbours. This is the alternative selector by IZIGANG tm
+    Take the graph and the set of  obligations and return the one which cumulate a maximum of neighbours.
     """
     b = 0
     neighbourI=set()
@@ -30,8 +30,9 @@ def moreConnectedObligation(graph, obligationSet):
 
         for vertex in obligationSet[i]:
 
-            for neighbourVertex in graph[vertex]:
-                neighbourI.add(neighbourVertex)
+            neighbourI = neighbourI | graph[vertex]
+            #for neighbourVertex in graph[vertex]:
+                #neighbourI.add(neighbourVertex)
 
             if len(neighbourI)>len(neighbourB):
                 b=i
@@ -40,7 +41,10 @@ def moreConnectedObligation(graph, obligationSet):
     return obligationSet[b]
 
 
-def alternativeObligation(graph,obligationSet):
+def mostCoveringObligation(graph,obligationSet):
+    """
+    Take the graph and the set of  obligations and return the one which covers a maximum of vertices .
+    """
     b = 0
     neighbourI=set()
     neighbourB=set()
@@ -50,8 +54,7 @@ def alternativeObligation(graph,obligationSet):
 
         for vertex in obligationSet[i]:
             neighbourI.add(vertex)
-            for neighbourVertex in graph[vertex]:
-                neighbourI.add(neighbourVertex)
+            neighbourI = neighbourI | graph[vertex]
 
             if len(neighbourI) > len(neighbourB):
                 b=i
@@ -60,9 +63,9 @@ def alternativeObligation(graph,obligationSet):
     return obligationSet[b]
 
 
-def alternative2Obligation(graph, obligationSet,balance = 2):
+def mostDominatingObligation(graph, obligationSet,balance = 2):
     """
-    Take the set of  obligations and return the one which cumulate a maximum of neighbours. This is the alternative selector by IZIGANG tm
+    Take the graph and the set of  obligations and return the one which has the better domination balance.
     """
     b = 0
     neighbourI=set()
@@ -72,16 +75,14 @@ def alternative2Obligation(graph, obligationSet,balance = 2):
         neighbourI=set()
 
         for vertex in obligationSet[i]:
-
-            for neighbourVertex in graph[vertex]:
-                neighbourI.add(neighbourVertex)
+            neighbourI.add(vertex)
+            neighbourI = neighbourI | graph[vertex]
 
             if len(neighbourI) * (1+balance)/len(obligationSet[i])>len(neighbourB)*(1+balance)/len(obligationSet[b]):
                 b=i
                 neighbourB=neighbourI.copy()
 
     return obligationSet[b]
-# Obligation selector algorithm, Random alternative
 
 def randomObligation(obligationSet):
     """
@@ -102,19 +103,19 @@ def searchIDO(graph1, obligationSet1, mode = "Laforest"):
 
     while len(obligationSet) != 0:
 
-        if mode ==  "Laforest" : 
+        if mode ==  "Size" : 
             b = biggestObligation(obligationSet)
             #print("Laforest")
 
-        elif mode == "IZIGANG":
-            b = moreConnectedObligation(graph, obligationSet)
+        elif mode == "Dominant":
+            b = mostDominantObligation(graph, obligationSet)
             #print("IZIGANG")
 
-        elif mode == "Alternative":
-            b = alternativeObligation(graph,obligationSet)
+        elif mode == "Covering":
+            b = mostCoveringObligation(graph,obligationSet)
 
-        elif mode == "Alternative2":
-            b = alternative2Obligation(graph,obligationSet)
+        elif mode == "Dominating":
+            b = mostDominatingObligation(graph,obligationSet)
         
         elif mode == "Random":
             b = randomObligation(obligationSet)

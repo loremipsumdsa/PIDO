@@ -21,6 +21,8 @@ def deleteVertex(graph, v):
         del graph[v]
     except KeyError:
         pass
+    for vertex in graph.keys():
+        graph[vertex] = graph[vertex] - {v}
 
 
 
@@ -52,7 +54,7 @@ def obligationsGenerator(graph,minObligations=5,maxObligations=10):
     while set() in obligationSet:
         obligationSet.remove(set())
 
-    if len(obligationSet)>obligations:
+    if len(obligationSet)>maxObligations or len(obligationSet)<minObligations:
         printW(f"WARNING: The obligations generator could not generate a number of obligations uncluded between {minObligations} and {maxObligations}.")
         printW(f"It, instead, created {len(obligationSet)} obligations.")
 
@@ -70,12 +72,6 @@ def instanceGenerator(minVertices = 100, maxVertices = 1000, minObligations = 3,
     """
     vertices = randint(minVertices, maxVertices)
 
-    if maxObligations > vertices:
-        maxObligations = vertices
-    if minObligations > vertices:
-        minObligations = vertices
-    obligations = randint(minObligations, maxObligations)
-
     if maxEdges > 2**(vertices - 1):
         maxEdges = 2**(vertices - 1)
     if minEdges > 2**(vertices - 1):
@@ -83,36 +79,25 @@ def instanceGenerator(minVertices = 100, maxVertices = 1000, minObligations = 3,
     edges = randint(minEdges, maxEdges)
     
     graph = dict()
-    obligationSet = []
-
-    for i in range(obligations):
-        obligationSet.append(set())
 
     for v in range(vertices):
-        o = randint(0,obligations - 1)
-        obligationSet[o].add(v)
         addVertex(graph, v)
-
-    while set() in obligationSet:
-        obligationSet.remove(set())
-        obligations -=1 
 
     actualEdges = 0
     while actualEdges < edges:
 
-        o1 = randint(0,obligations - 1)
-        o2 = o1
-        while o2 == o1:
-            o2 = randint(0,obligations - 1)
+        v1 = randint(0, vertices-1)
+        v2 = v1
+        while v1 == v2 or v1 in graph[v2]:
+            v1 = randint(0, vertices-1)
 
-        p1 = randint(0, len(obligationSet[o1]) - 1)
-        p2 = randint(0, len(obligationSet[o2]) - 1)
+        addEdge(graph, v1, v2)
+        actualEdges+=1
 
-        if not(p1 in graph[p2]):
-            addEdge(graph, list(obligationSet[o1])[p1], list(obligationSet[o2])[p2])
-            actualEdges+=1
+    (obligationSet, n) = obligationsGenerator(graph, minObligations, maxObligations)
 
-    return (graph, obligationSet)
+    meta = {"type" : "Classic", "vertices" : vertices, "obligations" : n}
+    return (graph, obligationSet, meta)
 
 def instanceGeneratorConnexe(minVertices = 100, maxVertices = 1000, minObligations = 3, maxObligations = 100, minEdges = 100, maxEdges = 1000):
     """
@@ -124,13 +109,6 @@ def instanceGeneratorConnexe(minVertices = 100, maxVertices = 1000, minObligatio
     """
     vertices = randint(minVertices, maxVertices)
 
-
-    if maxObligations > vertices:
-        maxObligations = vertices
-    if minObligations > vertices:
-        minObligations = vertices
-    obligations = randint(minObligations, maxObligations)
-
     if maxEdges > 2**(vertices - 1):
         maxEdges = 2**(vertices - 1)
     if minEdges < vertices - 1:
@@ -140,49 +118,35 @@ def instanceGeneratorConnexe(minVertices = 100, maxVertices = 1000, minObligatio
     actualEdges = 0
 
     graph = dict()
-    obligationSet = []
 
-    for i in range(obligations):
-        obligationSet.append(set())
-
-    obligationSet[0].add(0)
     addVertex(graph,0)
 
     for v in range(1, vertices):
         vp = randint(0,v-1)
-        o = choice(obligationSet)
-        while vp in o:
-            o = choice(obligationSet)
 
-        o.add(v)
         addVertex(graph, v)
         addEdge(graph, v, vp)
 
 
-    while set() in obligationSet:
-        obligationSet.remove(set())
-        obligations -=1 
-
     for i in range(edges - vertices):
 
-        o1 = randint(0,obligations - 1)
-        o2 = o1
-        while o2 == o1:
-            o2 = randint(0,obligations - 1)
+        v1 = randint(0, vertices-1)
+        v2 = v1
+        while v1 == v2 or v1 in graph[v2]:
+            v1 = randint(0, vertices-1)
 
-        p1 = randint(0, len(obligationSet[o1]) - 1)
-        p2 = randint(0, len(obligationSet[o2]) - 1)
+        addEdge(graph, v1, v2)
 
-        addEdge(graph, list(obligationSet[o1])[p1], list(obligationSet[o2])[p2])
+    obligationSet, n = obligationsGenerator(graph,minObligations,maxObligations)
 
-    return (graph, obligationSet)
+    meta = {"type" : "Connexe", "vertices" : vertices, "obligations" : n}
+    return (graph, obligationSet, meta)
 
 def instanceGeneratorProportionnal(minVertices = 10 , maxVertices = 100,coef = 25):
     """
     Return a random instance : a tuple of a graph (dictionnary) and an obligation set.
-    The instance will respect the specifications in parameter : minVertices, maxVertices
-
-
+    The instance will respect the specifications in parameter : minVertices, maxVertices and coef times more
+    edges than vertices
     """
     vertices = randint(minVertices,maxVertices)
     edges = int(coef * vertices)
@@ -195,7 +159,7 @@ def instanceGeneratorComplete_graph(minVertices=5,maxVertices=10,minObligations=
     n varies randomly between minVertices and maxVertices."""
     n = randint(minVertices,maxVertices)
 
-    obligations = randint(minObligations,maxObligations)
+    vertices = 0
 
     obligationSet=[]
 
@@ -203,26 +167,28 @@ def instanceGeneratorComplete_graph(minVertices=5,maxVertices=10,minObligations=
 
     for vertex in range(0,n):
         addVertex(graph,vertex)
+        vertices +=1
         for neighbour in range(0,vertex):
             addEdge(graph,vertex,neighbour)
         for neighbour in range(vertex+1,n):
             addEdge(graph,vertex,neighbour)
 
-    obligationSet,obligations=obligationsGenerator(graph,obligations,obligations)
+    obligationSet,n=obligationsGenerator(graph,minObligations,maxObligations)
 
-    return (graph,obligationSet)
+    meta = {"type" : "Complete", "vertices" : vertices, "obligations" : n}
+    return (graph, obligationSet, meta)
 
 
 
 def instanceGeneratorGrid_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=10,minObligations=5,maxObligations=20):
     """Constructs a grid pXq, returns the corresponding graph and a set of minObligations to maxObligations obligations.
     p varis between minColumns and maxColumns and q varies between minLines and maxLines."""
+
     p = randint(minColumns,maxColumns)
 
     q = randint(minLines,maxLines)
 
-    obligations = randint(minObligations, maxObligations)
-
+    vertices = 0
     obligationSet=[]
 
     graph=createGraph()
@@ -230,6 +196,7 @@ def instanceGeneratorGrid_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=1
     for i in range(p):
         for j in range(q):
             addVertex(graph,str(i)+str(j))
+            vertices +=1
     for i in range(p):
         for j in range(q):
             if i-1 >= 0 :
@@ -241,9 +208,10 @@ def instanceGeneratorGrid_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=1
             if j+1 < q:
                 addEdge(graph,str(i)+str(j),str(i)+str(j+1))
 
-    obligationSet,obligations=obligationsGenerator(graph,obligations,obligations)
+    obligationSet, n = obligationsGenerator(graph,minObligations,maxObligations)
 
-    return (graph,obligationSet)
+    meta = {"type" : "Grid", "vertices" : vertices, "obligations" : n}
+    return (graph, obligationSet, meta)
 
 
 
@@ -254,8 +222,7 @@ def instanceGeneratorTorus_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=
 
     q = randint(minLines,maxLines)
 
-    obligations = randint(minObligations, maxObligations)
-
+    vertices = 0
     obligationSet=[]
 
     graph=createGraph()
@@ -263,6 +230,7 @@ def instanceGeneratorTorus_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=
     for i in range(p):
         for j in range(q):
             addVertex(graph,str(i)+str(j))
+            vertices +=1
     for i in range(p):
         for j in range(q):
             if i-1 >= 0 :
@@ -286,9 +254,10 @@ def instanceGeneratorTorus_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=
                 graph[str(i)+str(j)].add(str(i)+'0')
                 graph[str(i)+'0'].add(str(i)+str(j))
 
-    obligationSet,obligations=obligationsGenerator(graph,obligations,obligations)
+    obligationSet,n=obligationsGenerator(graph,minObligations,maxObligations)
 
-    return (graph,obligationSet)
+    meta = {"type" : "Torus", "vertices" : vertices, "obligations" : n}
+    return (graph, obligationSet, meta)
 
 
 
@@ -299,9 +268,7 @@ def instanceGeneratorHypercube(minDimensions = 10, maxDimensions = 10, minObliga
     Two vertices are neighbors iff they differ on exactly one bit.
     For example, 01001 and 01101 are neighbors in hypercube(5)."""
     dimensions = randint(minDimensions, maxDimensions)
-
-    obligations = randint(minObligations, maxObligations)
-
+    vertices = 0
     obligationSet = []
 
     graph=createGraph()
@@ -312,17 +279,28 @@ def instanceGeneratorHypercube(minDimensions = 10, maxDimensions = 10, minObliga
         vertex="0"*(dimensions-len(vertex))+vertex
         binary=list(vertex)
         addVertex(graph,vertex)
+        vertices+=1
         for bit in range(0,len(binary)):
             binary[bit]=str((int(binary[bit])-1)*(-1))
             addEdge(graph,vertex,''.join(binary))
             binary[bit]=str((int(binary[bit])-1)*(-1))
     
 
-    obligationSet,obligations=obligationsGenerator(graph,obligations,obligations)
+    obligationSet,n=obligationsGenerator(graph,minObligations,maxObligations)
 
 
-    return (graph,obligationSet)
+    meta = {"type" : "hypercube", "vertices" : vertices, "obligations" : n}
+    return (graph, obligationSet, meta)
 
+
+def instanceGeneratorFullRandom():
+    
+    generator = (instanceGenerator, instanceGeneratorConnexe, instanceGeneratorComplete_graph, instanceGeneratorGrid_graph, instanceGeneratorTorus_graph, instanceGeneratorHypercube)
+
+    graph, obligationsSet, meta = choice(generator)()
+    meta["type"] = "Full Random"
+
+    return graph, obligationsSet, meta 
 
 def instanceFromFile(file):
     graphMode = True
@@ -352,9 +330,12 @@ def instanceFromFile(file):
 
     if obligationsSet == []:
         printW("Warning : Aucune obligation n'a été lu. Un set d'obligation aléatoire va être généré")
-        obligationsSet = obligationsGenerator(graph, minObligations = 1, maxObligations = len(graph.keys()))
+        obligationsSet, n = obligationsGenerator(graph, minObligations = 1, maxObligations = len(graph.keys()))
+    else :
+        n = len(obligationsSet)
 
-    return (graph,obligationsSet)
+    meta = {"type" : "From file", "vertices" : vertices, "obligations" : n}
+    return (graph, obligationSet, meta)
 
 def instanceToFile(graph, obligationsSet, file):
     graphMode = True
