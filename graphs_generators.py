@@ -1,6 +1,8 @@
 from random import randint, choice, shuffle
 from visualisation_tools import *
 from math import *
+
+
 # Graph manipulation functions
 def addEdge(graph, v1,v2):
     try :
@@ -142,17 +144,6 @@ def instanceGeneratorConnexe(minVertices = 100, maxVertices = 1000, minObligatio
     meta = {"type" : "Connexe", "vertices" : vertices, "obligations" : n}
     return (graph, obligationSet, meta)
 
-def instanceGeneratorProportionnal(minVertices = 10 , maxVertices = 100,coef = 25):
-    """
-    Return a random instance : a tuple of a graph (dictionnary) and an obligation set.
-    The instance will respect the specifications in parameter : minVertices, maxVertices and coef times more
-    edges than vertices
-    """
-    vertices = randint(minVertices,maxVertices)
-    edges = int(coef * vertices)
-    return instanceGenerator(minVertices = vertices, maxVertices = vertices, minEdges = edges, maxEdges = edges)
-
-
 
 def instanceGeneratorComplete_graph(minVertices=5,maxVertices=10,minObligations=10,maxObligations=20):
     """Constructs a complete graph of n vertices, returns the corresponding graph and a setof minObligations to maxObligations obligations.
@@ -293,16 +284,25 @@ def instanceGeneratorHypercube(minDimensions = 10, maxDimensions = 10, minObliga
     return (graph, obligationSet, meta)
 
 
-def instanceGeneratorFullRandom():
-    
+def instanceGeneratorFullRandom(eraseType = True):
+    """
+    Return a random instance from a random type
+    """
     generator = (instanceGenerator, instanceGeneratorConnexe, instanceGeneratorComplete_graph, instanceGeneratorGrid_graph, instanceGeneratorTorus_graph, instanceGeneratorHypercube)
 
     graph, obligationsSet, meta = choice(generator)()
-    meta["type"] = "Full Random"
+    
+    if eraseType:
+        meta["type"] = "Full Random"
 
     return graph, obligationsSet, meta 
 
+
 def instanceFromFile(file):
+    """
+    take a file path and extract a graph from it
+    An obligation set is generate if any found
+    """
     graphMode = True
 
     graph = dict()
@@ -329,7 +329,7 @@ def instanceFromFile(file):
 
 
     if obligationsSet == []:
-        printW("Warning : Aucune obligation n'a été lu. Un set d'obligation aléatoire va être généré")
+        printW("Warning : No obligation set found. It will be automatically provide")
         obligationsSet, n = obligationsGenerator(graph, minObligations = 1, maxObligations = len(graph.keys()))
     else :
         n = len(obligationsSet)
@@ -337,7 +337,11 @@ def instanceFromFile(file):
     meta = {"type" : "From file", "vertices" : vertices, "obligations" : n}
     return (graph, obligationSet, meta)
 
+
 def instanceToFile(graph, obligationsSet, file):
+    """
+    take an instance and a file path and print the instance on it
+    """
     graphMode = True
 
     with open(file,"w+") as f :

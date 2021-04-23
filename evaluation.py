@@ -3,12 +3,13 @@ from graphs_generators import *
 from visualisation_tools import printD
 
 def checkSolution(os,solution):
+    """
+    Take an obligations set and a solution and check whether the solution respects the obligations or not
+    """
     for o in os:
         if o.intersection(solution) != set() and o - solution != set() :
             return False
     return True 
-
-
 
 
 #Solution evaluation function
