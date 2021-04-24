@@ -31,7 +31,7 @@ def evaluatePIDO(graph, solution):
     return (coveredRate, dominantRate, domination)
 
 
-def statisticCompare(n, generator, modes):
+def statisticCompare(n, generator, selectors, ordered = False):
     """
     take a integer n, an instance generator function and a list of obligation selector modes
     Calculate and evaluate a PIDO solution for n instance from the generator with each mode
@@ -40,8 +40,8 @@ def statisticCompare(n, generator, modes):
     globalMeta = {"n" : n, "vertices" : 0, "obligations" : 0, "minVertices" : 0, "maxVertices" : 0, "minObligations" : 0, "maxObligations" : 0}
 
     statistics = dict()
-    for mode in modes:
-        statistics[mode] = [0,0,0]
+    for selector in selectors:
+        statistics[selector.__name__] = [0,0,0]
 
 
     for i in range(n):
@@ -60,23 +60,32 @@ def statisticCompare(n, generator, modes):
         if meta["obligations"] < globalMeta["minObligations"] or globalMeta["minObligations"] == 0:
             globalMeta["minObligations"]= meta["obligations"]
 
-        for mode in modes:
-            solution = searchIDO(g,os, mode = mode)
+        for selector in selectors:
+            
+            if ordered:
+                os = obligationsOrder(g, os, selector)
+                solution = searchIDO(g, os, nextObligation)
+            
+            else :
+                solution = searchIDO(g, os, selector)
+            
             coveredRate, dominantRate, domination = evaluatePIDO(g,solution)
-            statistics[mode][0] += coveredRate
-            statistics[mode][1] += dominantRate
-            statistics[mode][2] += domination
+            statistics[selector.__name__][0] += coveredRate
+            statistics[selector.__name__][1] += dominantRate
+            statistics[selector.__name__][2] += domination
 
-    for mode in modes:
-        statistics[mode][0]/=n
-        statistics[mode][1]/=n
-        statistics[mode][2]/=n
+    for selector in selectors:
+        statistics[selector.__name__][0]/=n
+        statistics[selector.__name__][1]/=n
+        statistics[selector.__name__][2]/=n
 
-        printD(f"Mode {mode} : covered : {statistics[mode][0]} , dominants :{statistics[mode][1]} , domination : {statistics[mode][2]}.")
+        printD(f"Mode {selector.__name__} : covered : {statistics[selector.__name__][0]} , dominants :{statistics[selector.__name__][1]} , domination : {statistics[selector.__name__][2]}.")
 
     globalMeta["vertices"] = round(globalMeta["vertices"]/n)
     globalMeta["obligations"] = round(globalMeta["obligations"]/n)
 
+    if ordered:
+        globalMeta["type"] = "Ordered " + globalMeta["type"]
 
 
     return statistics, globalMeta

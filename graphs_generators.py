@@ -1,7 +1,7 @@
 from random import randint, choice, shuffle
 from visualisation_tools import *
 from math import *
-
+from copy import copy
 
 # Graph manipulation functions
 def addEdge(graph, v1,v2):
@@ -63,9 +63,20 @@ def obligationsGenerator(graph,minObligations=5,maxObligations=10):
     return (obligationSet,len(obligationSet))
 
 
+def obligationsOrder(graph1, obligationsSet1, selector):
+    obligationsSet = copy(obligationsSet1)
+    graph = copy(graph1)
+    orderedObligationsSet = []
+    while obligationsSet != []:
+        o = selector(graph,obligationsSet)
+        orderedObligationsSet.append(o)
+        obligationsSet.remove(o)
+
+    return orderedObligationsSet
+
 
 #Instance generators
-def instanceGenerator(minVertices = 100, maxVertices = 1000, minObligations = 3, maxObligations = 100, minEdges = 100, maxEdges = 1000):
+def instanceGenerator(minVertices = 100, maxVertices = 1000, minObligations = 3, maxObligations = 900, minEdges = 100, maxEdges = 1000):
     """
     Return a random instance : a tuple of a graph (dictionnary) and an obligation set. 
     The instance will respect the specifications in parameter : minVertices, maxVertices, minObligations, maxObligations, minEdges, maxEdges
@@ -101,7 +112,7 @@ def instanceGenerator(minVertices = 100, maxVertices = 1000, minObligations = 3,
     meta = {"type" : "Classic", "vertices" : vertices, "obligations" : n}
     return (graph, obligationSet, meta)
 
-def instanceGeneratorConnexe(minVertices = 100, maxVertices = 1000, minObligations = 3, maxObligations = 100, minEdges = 100, maxEdges = 1000):
+def instanceGeneratorConnexe(minVertices = 100, maxVertices = 1000, minObligations = 3, maxObligations = 900, minEdges = 100, maxEdges = 1000):
     """
     Return a random instance : a tuple of a connexe graph (dictionnary) and an obligation set. 
     The instance will respect the specifications in parameter : minVertices, maxVertices, minObligations, maxObligations, minEdges, maxEdges
@@ -145,7 +156,7 @@ def instanceGeneratorConnexe(minVertices = 100, maxVertices = 1000, minObligatio
     return (graph, obligationSet, meta)
 
 
-def instanceGeneratorComplete_graph(minVertices=5,maxVertices=10,minObligations=10,maxObligations=20):
+def instanceGeneratorComplete_graph(minVertices=5,maxVertices=10,minObligations=3,maxObligations=900):
     """Constructs a complete graph of n vertices, returns the corresponding graph and a setof minObligations to maxObligations obligations.
     n varies randomly between minVertices and maxVertices."""
     n = randint(minVertices,maxVertices)
@@ -171,7 +182,7 @@ def instanceGeneratorComplete_graph(minVertices=5,maxVertices=10,minObligations=
 
 
 
-def instanceGeneratorGrid_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=10,minObligations=5,maxObligations=20):
+def instanceGeneratorGrid_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=10,minObligations=3,maxObligations=900):
     """Constructs a grid pXq, returns the corresponding graph and a set of minObligations to maxObligations obligations.
     p varis between minColumns and maxColumns and q varies between minLines and maxLines."""
 
@@ -206,7 +217,7 @@ def instanceGeneratorGrid_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=1
 
 
 
-def instanceGeneratorTorus_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=10,minObligations=5,maxObligations=20):
+def instanceGeneratorTorus_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=10,minObligations=3,maxObligations=900):
     """Constructs a torus pXq, returns the corresponding graph and a set of minObligations to maxObligations obligations.
     p varies between minColumns and maxColumns and q varies between minLines and maxLines."""
     p = randint(minColumns,maxColumns)
@@ -252,7 +263,7 @@ def instanceGeneratorTorus_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=
 
 
 
-def instanceGeneratorHypercube(minDimensions = 10, maxDimensions = 10, minObligations =6 , maxObligations = 6):
+def instanceGeneratorHypercube(minDimensions = 6, maxDimensions = 10, minObligations =3 , maxObligations = 900):
     """Constructs the hypercube graph of random dimension between minDimensions and maxDimensions and returns the graph plus the set of minObligations to maxObligations obligations.
     Each vertex is associated to a binary word of length d.
     For example '001101' is a vertex of hypercube of dimension 6.

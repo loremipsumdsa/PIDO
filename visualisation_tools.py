@@ -140,7 +140,7 @@ def statisticsVisualisation(statistics, meta, view = False, save = True):
     plt.bar(labels, y2, width = width, bottom = y1, color = DOMNINATED_COLOR, label = "Dominated Vertices")
     plt.title(title)
     plt.ylabel("Vertices rate (%)")
-    plt.legend(loc = "upper left")
+    #plt.legend(loc = "upper left")
 
 
     for bar in labels:

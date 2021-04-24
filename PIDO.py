@@ -5,7 +5,7 @@ from visualisation_tools import *
 
 
 # Obligation selector algorithm, original
-def biggestObligation(obligationSet):
+def biggestObligation(graph,obligationSet):
     """
     Take the set of  obligations and return the one which contains a maximum of vertices. This is the original selector by C. Laforest 
     """
@@ -63,7 +63,7 @@ def mostCoveringObligation(graph,obligationSet):
     return obligationSet[b]
 
 
-def mostDominatingObligation(graph, obligationSet,balance = 2):
+def mostDominatingObligation(graph,obligationSet):
     """
     Take the graph and the set of  obligations and return the one which has the better domination balance.
     """
@@ -78,20 +78,22 @@ def mostDominatingObligation(graph, obligationSet,balance = 2):
             neighbourI.add(vertex)
             neighbourI = neighbourI | graph[vertex]
 
-            if len(neighbourI) * (1+balance)/len(obligationSet[i])>len(neighbourB)*(1+balance)/len(obligationSet[b]):
+            if len(neighbourI)/len(obligationSet[i])>len(neighbourB)/len(obligationSet[b]):
                 b=i
                 neighbourB=neighbourI.copy()
 
     return obligationSet[b]
 
-def randomObligation(obligationSet):
+def randomObligation(graph,obligationSet):
     """
     Take the set of  obligations and return a random one
     """
     return choice(obligationSet)
 
+def nextObligation(graph, obligationSet):
+    return obligationSet[0]
 
-def searchIDO(graph1, obligationSet1, mode = "Laforest"):
+def searchIDO(graph1, obligationSet1, selector):
     """
     Take the an instance : a graphs (dictionnary) and an obligation set plus a mode (Laforest, IZIGANG or Random)
     Calculate a PIDO by using the selected selector
@@ -103,26 +105,7 @@ def searchIDO(graph1, obligationSet1, mode = "Laforest"):
 
     while len(obligationSet) != 0:
 
-        if mode ==  "Size" : 
-            b = biggestObligation(obligationSet)
-            #print("Laforest")
-
-        elif mode == "Dominant":
-            b = mostDominantObligation(graph, obligationSet)
-            #print("IZIGANG")
-
-        elif mode == "Covering":
-            b = mostCoveringObligation(graph,obligationSet)
-
-        elif mode == "Dominating":
-            b = mostDominatingObligation(graph,obligationSet)
-        
-        elif mode == "Random":
-            b = randomObligation(obligationSet)
-            #print("Random")
-
-        else :
-            exit("Error : Unknown mode")
+        b = selector(graph,obligationSet)
 
         printD(f"Working on obligation containing {b} ")
         s = s | b
