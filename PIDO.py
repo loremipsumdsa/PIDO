@@ -4,10 +4,9 @@ from graphs_generators import *
 from visualisation_tools import *
 
 
-# Obligation selector algorithm, original
 def biggestObligation(graph,obligationSet):
     """
-    Take the set of  obligations and return the one which contains a maximum of vertices. This is the original selector by C. Laforest 
+    Take an instance and return the obligation which contains a maximum of vertices. This is the original selector by C. Laforest 
     """
     b = 0
     for i in range (len(obligationSet)):
@@ -16,7 +15,6 @@ def biggestObligation(graph,obligationSet):
     return obligationSet[b]
 
 
-# Obligation selector algorithm, IZIGANG alternative
 def mostDominantObligation(graph, obligationSet):
     """
     Take the graph and the set of  obligations and return the one which cumulate a maximum of neighbours.
@@ -31,8 +29,6 @@ def mostDominantObligation(graph, obligationSet):
         for vertex in obligationSet[i]:
 
             neighbourI = neighbourI | graph[vertex]
-            #for neighbourVertex in graph[vertex]:
-                #neighbourI.add(neighbourVertex)
 
             if len(neighbourI)>len(neighbourB):
                 b=i
@@ -65,7 +61,7 @@ def mostCoveringObligation(graph,obligationSet):
 
 def mostDominatingObligation(graph,obligationSet):
     """
-    Take the graph and the set of  obligations and return the one which has the better domination balance.
+    Take an instance and return the obligation which has the better domination balance.
     """
     b = 0
     neighbourI=set()
@@ -86,17 +82,37 @@ def mostDominatingObligation(graph,obligationSet):
 
 def randomObligation(graph,obligationSet):
     """
-    Take the set of  obligations and return a random one
+    Take an instance and return a random obligation
     """
     return choice(obligationSet)
 
+
+def obligationsOrder(graph1, obligationsSet1, selector):
+    '''
+    Take an instance, a selector function and return the obligation set, ordered on the criteria of the selector
+    '''
+    obligationsSet = copy(obligationsSet1)
+    graph = copy(graph1)
+    orderedObligationsSet = []
+    while obligationsSet != []:
+        o = selector(graph,obligationsSet)
+        orderedObligationsSet.append(o)
+        obligationsSet.remove(o)
+
+    return orderedObligationsSet
+
+
 def nextObligation(graph, obligationSet):
+    '''
+    Take an instance with an ordered set of obligation, return the fist obligation
+    '''
     return obligationSet[0]
+
 
 def searchIDO(graph1, obligationSet1, selector):
     """
-    Take the an instance : a graphs (dictionnary) and an obligation set plus a mode (Laforest, IZIGANG or Random)
-    Calculate a PIDO by using the selected selector
+    Take the an instance : a graphs (dictionnary) and an obligation set plus a selector
+    Calculate a PIDO by using the given selector
     return the solution (set of dominants vertices)
     """
     graph = copy(graph1)

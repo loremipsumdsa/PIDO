@@ -12,11 +12,10 @@ def checkSolution(os,solution):
     return True 
 
 
-#Solution evaluation function
 def evaluatePIDO(graph, solution):
     """
     take a graph (dictionnary) and a PIDO solution (set of dominants vertices)
-    return a tuple of the covered vertices rate and dominants vertices rate (dominants are included in covered)
+    return a tuple of the covered vertices rate, dominants vertices rate (dominants are included in covered) and True if the solution in complet, else False
     """
     vertices = set(graph.keys())
     coveredVertices = set()
@@ -28,7 +27,9 @@ def evaluatePIDO(graph, solution):
         dominantRate = len(solution)/len(vertices) * 100
         domination = (coveredRate - dominantRate) / dominantRate
 
-    return (coveredRate, dominantRate, domination)
+    complet = len(coveredVertices) == len(graph.keys())
+
+    return (coveredRate, dominantRate, domination, complet)
 
 
 def statisticCompare(n, generator, selectors, ordered = False):
@@ -41,7 +42,7 @@ def statisticCompare(n, generator, selectors, ordered = False):
 
     statistics = dict()
     for selector in selectors:
-        statistics[selector.__name__] = [0,0,0]
+        statistics[selector.__name__] = [0,0,0,0]
 
 
     for i in range(n):
@@ -69,17 +70,18 @@ def statisticCompare(n, generator, selectors, ordered = False):
             else :
                 solution = searchIDO(g, os, selector)
             
-            coveredRate, dominantRate, domination = evaluatePIDO(g,solution)
+            coveredRate, dominantRate, domination, complet = evaluatePIDO(g,solution)
             statistics[selector.__name__][0] += coveredRate
             statistics[selector.__name__][1] += dominantRate
             statistics[selector.__name__][2] += domination
+            statistics[selector.__name__][3] += 1 if complet else 0
 
     for selector in selectors:
         statistics[selector.__name__][0]/=n
         statistics[selector.__name__][1]/=n
         statistics[selector.__name__][2]/=n
 
-        printD(f"Mode {selector.__name__} : covered : {statistics[selector.__name__][0]} , dominants :{statistics[selector.__name__][1]} , domination : {statistics[selector.__name__][2]}.")
+        printD(f"Mode {selector.__name__} : covered : {statistics[selector.__name__][0]} , dominants :{statistics[selector.__name__][1]} , domination : {statistics[selector.__name__][2]}, complets : {statistics[selector.__name__][3]}.")
 
     globalMeta["vertices"] = round(globalMeta["vertices"]/n)
     globalMeta["obligations"] = round(globalMeta["obligations"]/n)

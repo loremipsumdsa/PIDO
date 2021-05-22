@@ -4,6 +4,7 @@ from math import *
 from copy import copy
 
 # Graph manipulation functions
+
 def addEdge(graph, v1,v2):
     try :
         graph[v1].add(v2)
@@ -27,6 +28,7 @@ def deleteVertex(graph, v):
         graph[vertex] = graph[vertex] - {v}
 
 
+# Instance generators
 
 def obligationsGenerator(graph,minObligations=5,maxObligations=10):
     """Returns a set of minObligations to maxObligations obligations for a graph.
@@ -63,19 +65,6 @@ def obligationsGenerator(graph,minObligations=5,maxObligations=10):
     return (obligationSet,len(obligationSet))
 
 
-def obligationsOrder(graph1, obligationsSet1, selector):
-    obligationsSet = copy(obligationsSet1)
-    graph = copy(graph1)
-    orderedObligationsSet = []
-    while obligationsSet != []:
-        o = selector(graph,obligationsSet)
-        orderedObligationsSet.append(o)
-        obligationsSet.remove(o)
-
-    return orderedObligationsSet
-
-
-#Instance generators
 def instanceGenerator(minVertices = 100, maxVertices = 1000, minObligations = 3, maxObligations = 900, minEdges = 100, maxEdges = 1000):
     """
     Return a random instance : a tuple of a graph (dictionnary) and an obligation set. 
@@ -217,7 +206,7 @@ def instanceGeneratorGrid_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=1
 
 
 
-def instanceGeneratorTorus_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=10,minObligations=3,maxObligations=900):
+def instanceGeneratorTorus_graph(minColumns=5,maxColumns=5,minLines=5,maxLines=5,minObligations=3,maxObligations=900):
     """Constructs a torus pXq, returns the corresponding graph and a set of minObligations to maxObligations obligations.
     p varies between minColumns and maxColumns and q varies between minLines and maxLines."""
     p = randint(minColumns,maxColumns)
@@ -345,8 +334,8 @@ def instanceFromFile(file):
     else :
         n = len(obligationsSet)
 
-    meta = {"type" : "From file", "vertices" : vertices, "obligations" : n}
-    return (graph, obligationSet, meta)
+    meta = {"type" : "From file", "vertices" : len(graph.keys()), "obligations" : len(obligationsSet)}
+    return (graph, obligationsSet, meta)
 
 
 def instanceToFile(graph, obligationsSet, file):

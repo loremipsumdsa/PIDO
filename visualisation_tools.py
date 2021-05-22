@@ -146,7 +146,7 @@ def statisticsVisualisation(statistics, meta, view = False, save = True):
     for bar in labels:
         plt.text(bar, statistics[bar][1]/2, str(round(statistics[bar][1],1))+"%", color='black', fontweight='light', fontsize = "large")
         plt.text(bar, (statistics[bar][1]+statistics[bar][0])/2, str(round(statistics[bar][0],1))+"%", color='black', fontweight='light', fontsize = "large")
-        plt.text(bar, (statistics[bar][0]), "("+str(round(statistics[bar][2],1))+")", color='black', fontweight='bold', fontsize = "small")
+        plt.text(bar, (statistics[bar][0]), "("+str(round(statistics[bar][2],1))+"| "+str(statistics[bar][3])+")", color='black', fontweight='bold', fontsize = "small")
 
     
     if view:

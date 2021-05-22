@@ -60,27 +60,21 @@ def ultimateTestO(n, generators, modes):
     
 def main():
 
-    #recevability_test()
-
-    # selectors = [biggestObligation, mostDominantObligation, mostCoveringObligation, mostDominatingObligation, randomObligation]
-    # s, m = statisticCompare(10000,instanceGenerator,selectors)
-    # statisticsVisualisation(s,m)
-
-    # s, m = statisticCompare(10000,instanceGenerator,selectors, ordered = True)
-    # statisticsVisualisation(s,m)
-
-    #g,os, m = instanceGeneratorHypercube()
-    #s = searchIDO(g,os,biggestObligation)
-    #graphs_visualisation(g,os,s,view = True, save = True)
-
-
+    
     generators = [instanceGenerator, instanceGeneratorConnexe, instanceGeneratorComplete_graph, instanceGeneratorGrid_graph, instanceGeneratorTorus_graph, instanceGeneratorHypercube, instanceGeneratorFullRandom]
     selectors = [biggestObligation, mostDominantObligation, mostCoveringObligation, mostDominatingObligation, randomObligation]
-    #ultimateTest(10000, generators , modes)
+
+    #recevability_test()
+
+    #g,os, m = instanceFromFile("graph_in_file_example")
+    
+    # g,os, m = instanceGeneratorTorus_graph()
+    # s = searchIDO(g,os,mostCoveringObligation)
+    # graphs_visualisation(g,os,s,view = False, save = True)
 
 
-    #ultimateTest(30_000, generators, selectors)# <---------- P A U L
+    # ultimateTest(30_000, generators, selectors)# <---------- P A U L
 
-    #ultimateTestO(30_000, generators, selectors)  # <---------- T H O M A S
+    # ultimateTestO(100, generators, selectors)  # <---------- T H O M A S
 
 main()
