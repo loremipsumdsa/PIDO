@@ -171,7 +171,7 @@ def instanceGeneratorComplete_graph(minVertices=5,maxVertices=10,minObligations=
 
 
 
-def instanceGeneratorGrid_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=10,minObligations=3,maxObligations=900):
+def instanceGeneratorGrid_graph(minColumns=5,maxColumns=50,minLines=5,maxLines=50,minObligations=3,maxObligations=900):
     """Constructs a grid pXq, returns the corresponding graph and a set of minObligations to maxObligations obligations.
     p varis between minColumns and maxColumns and q varies between minLines and maxLines."""
 
@@ -206,7 +206,7 @@ def instanceGeneratorGrid_graph(minColumns=5,maxColumns=10,minLines=5,maxLines=1
 
 
 
-def instanceGeneratorTorus_graph(minColumns=5,maxColumns=5,minLines=5,maxLines=5,minObligations=3,maxObligations=900):
+def instanceGeneratorTorus_graph(minColumns=5,maxColumns=50,minLines=5,maxLines=50,minObligations=3,maxObligations=900):
     """Constructs a torus pXq, returns the corresponding graph and a set of minObligations to maxObligations obligations.
     p varies between minColumns and maxColumns and q varies between minLines and maxLines."""
     p = randint(minColumns,maxColumns)
@@ -226,16 +226,12 @@ def instanceGeneratorTorus_graph(minColumns=5,maxColumns=5,minLines=5,maxLines=5
         for j in range(q):
             if i-1 >= 0 :
                 graph[str(i)+str(j)].add(str(i-1)+str(j))
-                #graph[str(i-1)+str(j)].add(str(i)+str(j))
             if i+1 < p:
                 graph[str(i)+str(j)].add(str(i+1)+str(j))
-                #graph[str(i+1)+str(j)].add(str(i)+str(j))
             if j-1 >= 0 :
                 graph[str(i)+str(j)].add(str(i)+str(j-1))
-                #graph[str(i)+str(j-1)].add(str(i)+str(j))
             if j+1 < q:
                 graph[str(i)+str(j)].add(str(i)+str(j+1))
-                #graph[str(i)+str(j+1)].add(str(i)+str(j))
 
             if (i == p-1):
                 graph[str(i)+str(j)].add('0'+str(j))

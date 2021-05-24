@@ -2,7 +2,6 @@ from PIDO import *
 from visualisation_tools import *
 from evaluation import *
 from graphs_generators import *
-#from graphs_generators2 import *
 import matplotlib.pyplot as plt
 import time
 
@@ -67,14 +66,15 @@ def main():
     #recevability_test()
 
     #g,os, m = instanceFromFile("graph_in_file_example")
-    
     # g,os, m = instanceGeneratorTorus_graph()
+
     # s = searchIDO(g,os,mostCoveringObligation)
     # graphs_visualisation(g,os,s,view = False, save = True)
 
 
-    # ultimateTest(30_000, generators, selectors)# <---------- P A U L
+    #ultimateTest(30_000, generators, selectors)# <---------- P A U L
 
-    # ultimateTestO(100, generators, selectors)  # <---------- T H O M A S
+    #ultimateTestO(30_000, generators, selectors)  # <---------- T H O M A S
+
 
 main()

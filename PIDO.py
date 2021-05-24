@@ -30,9 +30,9 @@ def mostDominantObligation(graph, obligationSet):
 
             neighbourI = neighbourI | graph[vertex]
 
-            if len(neighbourI)>len(neighbourB):
-                b=i
-                neighbourB=neighbourI.copy()
+        if len(neighbourI)>len(neighbourB):
+            b=i
+            neighbourB=neighbourI.copy()
 
     return obligationSet[b]
 
@@ -52,9 +52,9 @@ def mostCoveringObligation(graph,obligationSet):
             neighbourI.add(vertex)
             neighbourI = neighbourI | graph[vertex]
 
-            if len(neighbourI) > len(neighbourB):
-                b=i
-                neighbourB=neighbourI.copy()
+        if len(neighbourI) > len(neighbourB):
+            b=i
+            neighbourB=neighbourI.copy()
 
     return obligationSet[b]
 
@@ -74,9 +74,9 @@ def mostDominatingObligation(graph,obligationSet):
             neighbourI.add(vertex)
             neighbourI = neighbourI | graph[vertex]
 
-            if len(neighbourI)/len(obligationSet[i])>len(neighbourB)/len(obligationSet[b]):
-                b=i
-                neighbourB=neighbourI.copy()
+        if len(neighbourI)/len(obligationSet[i])>len(neighbourB)/len(obligationSet[b]):
+            b=i
+            neighbourB=neighbourI.copy()
 
     return obligationSet[b]
 
